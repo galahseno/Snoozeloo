@@ -8,6 +8,8 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.IBinder
+import android.os.VibrationEffect
+import android.os.Vibrator
 import androidx.core.app.NotificationCompat
 import androidx.core.content.getSystemService
 import id.dev.snoozeloo.R
@@ -51,7 +53,7 @@ class AlarmService : Service() {
                     serviceScope.launch {
                         val alarmSettings = alarmRepository.getAlarmById(id)
 
-                        start(applicationContext, alarmSettings)
+                        showNotification(applicationContext, alarmSettings)
 
                         if (alarmSettings.isActive) {
                             scheduleNextAlarm(applicationContext, alarmSettings)
@@ -65,8 +67,10 @@ class AlarmService : Service() {
         return START_STICKY
     }
 
-    private fun start(context: Context, alarmSettings: AlarmModel) {
+    private fun showNotification(context: Context, alarmSettings: AlarmModel) {
         alarmSettings.id?.let { id ->
+            val vibrator = context.getSystemService<Vibrator>()
+
             val fullScreenIntent = Intent(context, AlarmTriggerActivity::class.java).apply {
                 putExtra(EXTRA_ID, id)
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -104,6 +108,7 @@ class AlarmService : Service() {
 
             if (alarmSettings.isVibrate) {
                 builder.setVibrate(longArrayOf(1000, 1000, 1000, 1000, 1000))
+                vibrator?.vibrate(VibrationEffect.createWaveform(longArrayOf(1000, 1000, 1000, 1000, 1000), -1))
             }
 
             if (alarmSettings.alarmRingtoneUri.isNotEmpty()) {

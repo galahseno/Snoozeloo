@@ -32,6 +32,7 @@ class AlarmTriggerViewModel(
                         alarmVolume = alarmSettings.alarmVolume,
                         isVibrate = alarmSettings.isVibrate,
                         selectedDays = alarmSettings.selectedDays,
+                        isSnoozed = alarmSettings.snoozedTime.isNotEmpty()
                     )
                 }
             }

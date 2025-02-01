@@ -108,7 +108,11 @@ private fun NavGraphBuilder.alarmSettingsGraph(navController: NavHostController)
 
             AlarSettingsScreenRoot(
                 onBackClick = {
-                    navController.navigateUp()
+                    navController.navigate(Screen.AlarmHome.AlarmList) {
+                        popUpTo(navController.graph.id) {
+                            inclusive = true
+                        }
+                    }
                 },
                 onRingtoneClick = {
                     navController.navigate(Screen.AlarmSettingsRoute.RingtoneSettings)

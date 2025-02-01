@@ -1,6 +1,7 @@
 package id.dev.snoozeloo.core.presentation
 
 import android.content.Context
+import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.PowerManager
@@ -14,6 +15,11 @@ object AudioPlay {
         mediaPlayer?.let {
             it.isLooping = isLooping
             it.setWakeMode(context, PowerManager.PARTIAL_WAKE_LOCK)
+            it.setAudioAttributes(
+                AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_ALARM)
+                    .build()
+            )
             if (!it.isPlaying) {
                 it.start()
             }

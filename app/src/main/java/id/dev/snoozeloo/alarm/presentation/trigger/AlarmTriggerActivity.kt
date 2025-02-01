@@ -19,6 +19,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
@@ -70,31 +72,6 @@ class AlarmTriggerActivity : ComponentActivity() {
             SnoozelooTheme {
                 val state by viewModel.state.collectAsStateWithLifecycle()
 
-                DisposableEffect(Unit) {
-                    onDispose {
-                        state.id?.let { id ->
-                            val now = ZonedDateTime.now()
-                            val alarmLocalTime =
-                                parse24HourToLocalTime(state.snoozedTime.ifEmpty {
-                                    state.alarmTime
-                                })
-                            val alarmDateTime = now.with(alarmLocalTime).plusMinutes(5)
-                            val nextAlarmTime = if (state.isSnoozed) alarmDateTime
-                                .toLocalTime().toString() else ""
-
-                            viewModel.updateAlarmSettingWhenSnooze(nextAlarmTime)
-
-                            if (state.isSnoozed) {
-                                AlarmService().setDailyReminder(
-                                    this@AlarmTriggerActivity,
-                                    id,
-                                    nextAlarmTime
-                                )
-                            }
-                        }
-                    }
-                }
-
                 AlarmTriggerScreen(
                     state = state,
                     onAction = { action ->
@@ -110,6 +87,8 @@ class AlarmTriggerActivity : ComponentActivity() {
                                         )
                                     )
                                     AudioPlay.pauseAudio()
+                                    viewModel.updateAlarmSettingWhenSnooze("")
+
                                     finish()
                                 }
                             }
@@ -123,6 +102,22 @@ class AlarmTriggerActivity : ComponentActivity() {
                                         )
                                     )
                                     AudioPlay.pauseAudio()
+
+                                    val now = ZonedDateTime.now()
+                                    val alarmLocalTime =
+                                        parse24HourToLocalTime(state.snoozedTime.ifEmpty {
+                                            state.alarmTime
+                                        })
+                                    val alarmDateTime = now.with(alarmLocalTime).plusMinutes(5)
+                                    val nextAlarmTime = alarmDateTime
+                                        .toLocalTime().toString()
+
+                                    viewModel.updateAlarmSettingWhenSnooze(nextAlarmTime)
+                                    AlarmService().setDailyReminder(
+                                        this@AlarmTriggerActivity,
+                                        id,
+                                        nextAlarmTime
+                                    )
                                     finish()
                                 }
                             }
@@ -140,6 +135,10 @@ fun AlarmTriggerScreen(
     onAction: (AlarmTriggerAction) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val alarmTime by remember(state.alarmTime) {
+        mutableStateOf(if (state.isSnoozed) state.snoozedTime else state.alarmTime)
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize(),
@@ -165,7 +164,7 @@ fun AlarmTriggerScreen(
                 }
         )
         Text(
-            text = state.snoozedTime.ifEmpty { state.alarmTime },
+            text = alarmTime,
             fontFamily = montserrat,
             fontWeight = FontWeight.Medium,
             fontSize = 82.sp,

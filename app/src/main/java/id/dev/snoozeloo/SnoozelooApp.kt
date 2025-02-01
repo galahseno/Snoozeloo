@@ -4,6 +4,7 @@ import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Build
+import android.os.VibrationEffect
 import androidx.core.content.getSystemService
 import id.dev.snoozeloo.alarm.data.di.dataModule
 import id.dev.snoozeloo.alarm.presentation.di.presentationModule
@@ -27,8 +28,9 @@ class SnoozelooApp: Application() {
                 CHANNEL_ID,
                 "High priority notifications",
                 NotificationManager.IMPORTANCE_HIGH
-            )
-            channel.setSound(null, null)
+            ).apply {
+                setSound(null, null)
+            }
             val notificationManager = this.getSystemService<NotificationManager>() as NotificationManager
             notificationManager.createNotificationChannel(channel)
         }
