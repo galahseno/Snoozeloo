@@ -91,8 +91,10 @@ fun RingtoneSettingsScreenRoot(
             when (action) {
                 is AlarmSettingsAction.OnCloseRingtoneClick -> onBackClick()
                 is AlarmSettingsAction.OnAlarmRingtoneChange -> {
-                    if (action.uri.toString() != "Silent") {
+                    if (action.uri.toString() != "") {
                         AudioPlay.playAudio(context, action.uri, false)
+                    } else {
+                        AudioPlay.pauseAudio()
                     }
                 }
 

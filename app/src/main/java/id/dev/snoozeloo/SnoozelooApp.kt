@@ -4,7 +4,6 @@ import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Build
-import android.os.VibrationEffect
 import androidx.core.content.getSystemService
 import id.dev.snoozeloo.alarm.data.di.dataModule
 import id.dev.snoozeloo.alarm.presentation.di.presentationModule

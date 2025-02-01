@@ -2,41 +2,42 @@ package id.dev.snoozeloo.core.presentation
 
 import android.content.Context
 import android.media.AudioAttributes
+import android.media.AudioManager
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.PowerManager
+
 
 object AudioPlay {
     private var mediaPlayer: MediaPlayer? = null
 
     fun playAudio(context: Context, uri: Uri, isLooping: Boolean = true, volume: Float? = null) {
-        createMediaPlayer(context, uri, volume)
+        pauseAudio()
+
+        mediaPlayer = MediaPlayer()
 
         mediaPlayer?.let {
             it.isLooping = isLooping
             it.setWakeMode(context, PowerManager.PARTIAL_WAKE_LOCK)
-            it.setAudioAttributes(
-                AudioAttributes.Builder()
-                    .setUsage(AudioAttributes.USAGE_ALARM)
-                    .build()
-            )
-            if (!it.isPlaying) {
-                it.start()
+            it.setAudioAttributes(AudioAttributes.Builder().setFlags(AudioAttributes.FLAG_AUDIBILITY_ENFORCED)
+                .setLegacyStreamType(AudioManager.STREAM_ALARM)
+                .setUsage(AudioAttributes.USAGE_ALARM)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION).build())
+            it.setDataSource(context, uri)
+
+            volume?.let { volume ->
+                mediaPlayer?.setVolume(volume, volume)
             }
-        }
-    }
 
-    private fun createMediaPlayer(context: Context, uri: Uri, volume: Float? = null) {
-        mediaPlayer?.stop()
-
-        mediaPlayer = MediaPlayer.create(context, uri)
-        volume?.let {
-            mediaPlayer?.setVolume(it, it)
+            it.prepare()
+            it.start()
         }
     }
 
     fun pauseAudio() {
-        mediaPlayer?.pause()
+        mediaPlayer?.stop()
+        mediaPlayer?.release()
+        mediaPlayer = null
     }
 
 }
